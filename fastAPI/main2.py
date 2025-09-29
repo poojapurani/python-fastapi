@@ -17,4 +17,5 @@ class ItemResponse(BaseModel):
 def create_item(item: Item):
     print(item)
     return item
+
     
