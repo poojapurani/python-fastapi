@@ -4,11 +4,12 @@ from passlib.context import CryptContext
 from db import database,metadata,engine
 from models import users
 from schemas import UserLogin,UserCreate
+from passlib.context import CryptContext
 
 app = FastAPI()
 metadata.create_all(engine)
 
-pwd_context = CryptContext(schemes=["bcrypt"],deprecated="auto")
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 @app.on_event("startup")
 async def startup():
@@ -25,10 +26,10 @@ async def register(user:UserCreate):
     existing_user = await database.fetch_one(query)
     if existing_user:
         raise HTTPException(status_code=400,detail="username already exist")
-        hashed_password = pwd_context.hash(user.password)
-        query = users.insert().values(username=user.username, password=hashed_password)
-        await database.execute(query)
-        return {"message": "user registered succesfully"}
+    hashed_password = pwd_context.hash(user.password)
+    query = users.insert().values(username=user.username, password=hashed_password)
+    await database.execute(query)
+    return {"message": "user registered succesfully"}
     
 @app.post("/login")
 async def login(user: UserLogin):
